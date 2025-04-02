@@ -1,10 +1,11 @@
 import { Routes, Route } from "react-router";
-import { Button } from "@/components/ui/button";
 import LoginPage from "./pages/login-page";
-import { useAuthStore } from "./stores/useAuthStore";
+import { useAuthStore } from "./store/useAuthStore";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import ProtectedRoute from "./components/protected-route";
+import DashboardPage from "./pages/dashboard-page";
 
 function App() {
   const setUser = useAuthStore((state) => state.setUser);
@@ -23,11 +24,11 @@ function App() {
   return (
     <Routes>
       <Route
-        path="/"
+        path="/dashboard"
         element={
-          <div className="flex flex-col items-center justify-center min-h-svh">
-            <Button>Click me</Button>
-          </div>
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
         }
       />
       <Route path="/login" element={<LoginPage />} />
