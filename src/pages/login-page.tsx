@@ -1,8 +1,7 @@
 import { LoginForm } from "@/components/login-form";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { login } from "@/lib/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ export default function LoginPage() {
   const handleLogin = async (email: string, password: string) => {
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      await login(email, password);
       navigate(from, { replace: true });
     } catch (error) {
       console.error(error);
