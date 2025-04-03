@@ -35,3 +35,7 @@ export async function createProject(title: string, uid: string) {
     members: [uid],
   });
 }
+
+export async function createInitialProject(uid: string) {
+  await createProject("기본 프로젝트", uid);
+}
