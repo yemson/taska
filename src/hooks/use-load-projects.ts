@@ -9,10 +9,20 @@ export function useLoadProjects() {
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
-    getProjects(user.uid)
-      .then(setProjects)
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const projects = await getProjects(user.uid);
+        setProjects(projects);
+      } catch (err) {
+        console.error("프로젝트 로딩 실패", err);
+        setProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [user, setProjects, setLoading]);
 }
