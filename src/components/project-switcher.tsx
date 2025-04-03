@@ -1,5 +1,5 @@
-import * as React from "react"
-import { ChevronsUpDown, Plus } from "lucide-react"
+import { useState, ElementType } from "react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -9,29 +9,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { createProject } from "@/lib/projects";
+import { useAuthStore } from "@/store/use-auth-store";
+import { useLoadProjects } from "@/hooks/use-load-projects";
+import { useProjectStore } from "@/store/use-project-store";
+import { Project } from "@/types/project";
+import { useEffect } from "react";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
-}) {
-  const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+export function ProjectSwitcher() {
+  useLoadProjects();
+  const { projects } = useProjectStore();
+  const { isMobile } = useSidebar();
+  const user = useAuthStore((state) => state.user);
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
 
-  if (!activeTeam) {
-    return null
+  useEffect(() => {
+    if (projects.length > 0) {
+      setActiveProject(projects[0]);
+    }
+  }, [projects]);
+
+  if (!activeProject) {
+    return null;
   }
+
+  const handleCreateProject = async () => {
+    try {
+      await createProject("test", user!.uid);
+    } catch (error) {
+      console.error("Error creating project:", error);
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -43,11 +58,13 @@ export function TeamSwitcher({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeTeam.logo className="size-4" />
+                {activeProject.title}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate font-medium">
+                  {activeProject.title}
+                </span>
+                <span className="truncate text-xs">{activeProject.title}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -59,23 +76,27 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Projects
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {projects.map((project, index) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={project.id}
+                onClick={() => setActiveProject(project)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-3.5 shrink-0" />
+                  {/* <project.title className="size-3.5 shrink-0" /> */}
+                  <div>{project.title}</div>
                 </div>
-                {team.name}
+                {project.title}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem
+              onClick={handleCreateProject}
+              className="gap-2 p-2"
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <Plus className="size-4" />
               </div>
@@ -85,5 +106,5 @@ export function TeamSwitcher({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
