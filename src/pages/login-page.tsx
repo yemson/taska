@@ -1,20 +1,28 @@
 import { LoginForm } from "@/components/login-form";
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { login } from "@/lib/auth";
+import { getProjects } from "@/lib/projects";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/dashboard";
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (email: string, password: string) => {
     try {
       setLoading(true);
-      await login(email, password);
-      navigate(from, { replace: true });
+
+      const user = await login(email, password);
+      const projects = await getProjects(user.uid);
+
+      if (projects.length === 0) {
+        setErrorMessage("프로젝트가 없습니다. 관리자에게 문의하세요.");
+        return;
+      }
+
+      const firstProjectId = projects[0].id;
+      navigate(`/dashboard/${firstProjectId}`, { replace: true });
     } catch (error) {
       console.error(error);
       setErrorMessage("이메일 또는 비밀번호가 잘못되었습니다.");

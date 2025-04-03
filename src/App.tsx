@@ -42,7 +42,7 @@ function App() {
   return (
     <Routes>
       <Route
-        path="/dashboard"
+        path="/dashboard/:projectId"
         element={
           <ProtectedRoute>
             <DashboardPage />

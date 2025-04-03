@@ -13,5 +13,6 @@ export function useLoadProjects() {
     getProjects(user.uid)
       .then(setProjects)
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 }

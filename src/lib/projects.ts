@@ -1,5 +1,6 @@
 import {
   addDoc,
+  getDoc,
   getDocs,
   query,
   where,
@@ -27,13 +28,23 @@ export async function getProjects(uid: string): Promise<Project[]> {
   return myProjects;
 }
 
-export async function createProject(title: string, uid: string) {
-  await addDoc(collection(db, "projects"), {
+export async function createProject(
+  title: string,
+  uid: string,
+): Promise<Project> {
+  const docRef = await addDoc(collection(db, "projects"), {
     title,
     createdAt: serverTimestamp(),
     owner: uid,
     members: [uid],
   });
+
+  const snapshot = await getDoc(docRef);
+
+  return {
+    id: snapshot.id,
+    ...(snapshot.data() as Omit<Project, "id">),
+  };
 }
 
 export async function createInitialProject(uid: string) {
