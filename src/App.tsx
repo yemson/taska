@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/protected-route";
 import DashboardPage from "@/pages/dashboard-page";
 import RegisterPage from "@/pages/register-page";
 import { getProjects, createInitialProject } from "@/lib/projects";
+import { AppLoader } from "./components/app-loader";
 
 function App() {
   const { setUser, setInitialized, user, initialized } = useAuthStore();
@@ -37,7 +38,7 @@ function App() {
     ensureDefaultProject();
   }, [user, initialized]);
 
-  if (loading) return <div>로딩 중...</div>;
+  if (loading) return <AppLoader />;
 
   return (
     <Routes>
