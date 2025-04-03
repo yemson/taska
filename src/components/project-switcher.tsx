@@ -1,13 +1,24 @@
-import { ChevronsUpDown, Plus } from "lucide-react";
+import {
+  ChevronsUpDown,
+  GalleryVerticalEnd,
+  PenLine,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 
-import { NewProjectDialog } from "@/components/new-project-dialog";
+import { EditProjectNameDialog } from "@/components/dialog/edit-project-name-dialog";
+import { NewProjectDialog } from "@/components/dialog/new-project-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -17,25 +28,56 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useLoadProjects } from "@/hooks/use-load-projects";
+import { getBuckets } from "@/lib/buckets";
+import { useBucketStore } from "@/store/use-bucket-store";
 import { useProjectStore } from "@/store/use-project-store";
+import { Project } from "@/types/project";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
+import { DeleteProjectAlertDialog } from "./dialog/delete-project-alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectSwitcher() {
-  useLoadProjects();
-  const { projects } = useProjectStore();
   const { isMobile } = useSidebar();
   const { projectId } = useParams();
-  const { activeProject, setActiveProject } = useProjectStore();
+  const { activeProject, setActiveProject, projects, loading } =
+    useProjectStore();
+  const { setBuckets, setLoading } = useBucketStore();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
+  const [editProjectNameOpen, setEditProjectNameOpen] = useState(false);
+  const [editProject, setEditProject] = useState<Project | null>(null);
+  const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
+  const [deleteProjectId, setDeleteProjectId] = useState<string>("");
+
+  useLoadProjects();
 
   useEffect(() => {
-    if (!projectId || activeProject?.id === projectId) return;
+    if (!projectId) return;
     const found = projects.find((p) => p.id === projectId);
-    if (found) setActiveProject(found);
+    if (!found) return;
+    if (activeProject?.id === found.id) return;
+
+    setActiveProject(found);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects, projectId, activeProject]);
+  }, [projects, projectId]);
+
+  useEffect(() => {
+    if (!activeProject?.id) return;
+
+    setLoading(true);
+    getBuckets(activeProject.id)
+      .then(setBuckets)
+      .catch((error) => {
+        console.error(error);
+        setBuckets([]);
+      })
+      .finally(() => setLoading(false));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProject?.id]);
 
   const handleChangeProject = (projectId: string) => {
     const found = projects.find((p) => p.id === projectId);
@@ -44,8 +86,18 @@ export function ProjectSwitcher() {
     navigate(`/dashboard/${projectId}`);
   };
 
-  if (!activeProject) {
-    return null;
+  const handleEditProject = (project: Project) => {
+    setEditProject(project);
+    setEditProjectNameOpen(true);
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    setDeleteProjectId(projectId);
+    setDeleteProjectOpen(true);
+  };
+
+  if (!activeProject || loading) {
+    return <Skeleton className="h-12 w-full" />;
   }
 
   return (
@@ -79,21 +131,57 @@ export function ProjectSwitcher() {
                 프로젝트
               </DropdownMenuLabel>
               {projects.map((project) => (
-                <DropdownMenuItem
-                  key={project.id}
-                  onClick={() => handleChangeProject(project.id)}
-                  className="gap-2 p-2"
-                >
-                  <div className="flex size-6 items-center justify-center rounded-md border">
-                    {/* <project.title className="size-3.5 shrink-0" /> */}
-                    <div>{project.title.charAt(0)}</div>
-                  </div>
-                  {project.title}
-                </DropdownMenuItem>
+                <DropdownMenuSub key={project.id}>
+                  <DropdownMenuSubTrigger className="gap-2 p-2">
+                    <div className="flex size-6 items-center justify-center rounded-md border">
+                      <div>{project.title.charAt(0)}</div>
+                    </div>
+                    {project.title}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem
+                        onClick={() => handleChangeProject(project.id)}
+                      >
+                        <GalleryVerticalEnd className="text-muted-foreground" />
+                        <span>보기</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleEditProject(project)}
+                      >
+                        <PenLine className="text-muted-foreground" />
+                        <span>이름 변경</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => {
+                          if (projects.length === 1) {
+                            toast.error(
+                              "마지막 프로젝트는 삭제할 수 없습니다.",
+                            );
+                            return;
+                          }
+
+                          handleDeleteProject(project.id);
+                        }}
+                      >
+                        <Trash2 className="text-muted-foreground" />
+                        <span>제거</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                  if (projects.length >= 5) {
+                    toast.warning("프로젝트는 5개까지 생성 가능합니다.");
+                    return;
+                  }
+                  setNewProjectOpen(true);
+                }}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
@@ -107,8 +195,20 @@ export function ProjectSwitcher() {
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-
-      <NewProjectDialog open={open} onOpenChange={setOpen} />
+      <NewProjectDialog
+        open={newProjectOpen}
+        onOpenChange={setNewProjectOpen}
+      />
+      <EditProjectNameDialog
+        open={editProjectNameOpen}
+        onOpenChange={setEditProjectNameOpen}
+        editProject={editProject}
+      />
+      <DeleteProjectAlertDialog
+        open={deleteProjectOpen}
+        onOpenChange={setDeleteProjectOpen}
+        projectId={deleteProjectId}
+      />
     </>
   );
 }

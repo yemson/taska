@@ -14,7 +14,7 @@ interface ProjectStore {
 export const useProjectStore = create<ProjectStore>((set) => ({
   projects: [],
   activeProject: null,
-  loading: false,
+  loading: true,
   setProjects: (projects) => set({ projects }),
   setLoading: (loading) => set({ loading }),
   setActiveProject: (project) => set({ activeProject: project }),

@@ -14,6 +14,7 @@ import { createProject } from "@/lib/projects";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useProjectStore } from "@/store/use-project-store";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 interface NewProjectDialogProps {
   open: boolean;
@@ -49,6 +50,8 @@ export function NewProjectDialog({
     onOpenChange(false);
     setTitle("");
     setError("");
+
+    toast.success("새로운 프로젝트가 생성되었습니다.");
   };
 
   return (

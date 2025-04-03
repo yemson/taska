@@ -18,6 +18,7 @@ import {
 import { logout } from "@/lib/auth";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useNavigate } from "react-router";
+import { createInitialProject } from "@/lib/projects";
 
 export function NavUser() {
   const navigate = useNavigate();
@@ -79,6 +80,9 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => createInitialProject(user!.uid)}>
+              개발용
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               로그아웃

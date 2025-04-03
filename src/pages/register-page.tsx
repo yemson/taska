@@ -1,4 +1,4 @@
-import { RegisterForm } from "@/components/register-form";
+import { RegisterForm } from "@/components/form/register-form";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { register } from "@/lib/auth";
