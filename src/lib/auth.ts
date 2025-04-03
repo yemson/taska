@@ -1,6 +1,6 @@
 import { auth } from "@/lib/firebase";
 import { signOut, signInWithEmailAndPassword } from "firebase/auth";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store/use-auth-store";
 
 // 로그인 로직
 export async function login(email: string, password: string) {

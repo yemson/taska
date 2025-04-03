@@ -1,23 +1,20 @@
 import { ReactNode, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/store/use-auth-store";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
-
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const user = useAuthStore((state) => state.user);
+export default function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { user, initialized } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!initialized) return;
     if (!user) {
-      console.log("로그인 안 되어 있음. 리디렉션 중...");
       navigate("/login", { state: { from: location }, replace: true });
     }
-  }, [user, location, navigate]);
+  }, [user, location, navigate, initialized]);
 
+  if (!initialized) return null;
   if (!user) return null;
 
   return <>{children}</>;
