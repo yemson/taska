@@ -24,8 +24,10 @@ export function DeleteProjectAlertDialog({
   onOpenChange,
   projectId,
 }: DeleteProjectAlertDialogProps) {
-  const { projects, setProjects, activeProject, setActiveProject } =
-    useProjectStore();
+  const projects = useProjectStore((state) => state.projects);
+  const setProjects = useProjectStore((state) => state.setProjects);
+  const activeProject = useProjectStore((state) => state.activeProject);
+  const setActiveProject = useProjectStore((state) => state.setActiveProject);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {

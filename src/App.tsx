@@ -11,7 +11,10 @@ import { getProjects, createInitialProject } from "@/lib/projects";
 import { AppLoader } from "./components/app-loader";
 
 function App() {
-  const { setUser, setInitialized, user, initialized } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const initialized = useAuthStore((state) => state.initialized);
+  const setUser = useAuthStore((state) => state.setUser);
+  const setInitialized = useAuthStore((state) => state.setInitialized);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,6 +55,7 @@ function App() {
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/" element={<div>asdf</div>} />
     </Routes>
   );
 }

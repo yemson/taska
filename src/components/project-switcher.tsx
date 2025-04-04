@@ -27,9 +27,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useLoadProjects } from "@/hooks/use-load-projects";
-import { getBuckets } from "@/lib/buckets";
-import { useBucketStore } from "@/store/use-bucket-store";
 import { useProjectStore } from "@/store/use-project-store";
 import { Project } from "@/types/project";
 import { useEffect } from "react";
@@ -37,47 +34,35 @@ import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { DeleteProjectAlertDialog } from "./dialog/delete-project-alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/store/use-auth-store";
 
 export function ProjectSwitcher() {
   const { isMobile } = useSidebar();
   const { projectId } = useParams();
-  const { activeProject, setActiveProject, projects, loading } =
-    useProjectStore();
-  const { setBuckets, setLoading } = useBucketStore();
   const navigate = useNavigate();
+
+  const user = useAuthStore((state) => state.user);
+
+  const activeProject = useProjectStore((state) => state.activeProject);
+  const setActiveProject = useProjectStore((state) => state.setActiveProject);
+  const projects = useProjectStore((state) => state.projects);
+  const loading = useProjectStore((state) => state.loading);
+  const loadProjects = useProjectStore((state) => state.loadProjects);
+  const projectsLoaded = useProjectStore((state) => state.projectsLoaded);
+
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [editProjectNameOpen, setEditProjectNameOpen] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
   const [deleteProjectId, setDeleteProjectId] = useState<string>("");
 
-  useLoadProjects();
-
+  // 컴포넌트에서
   useEffect(() => {
-    if (!projectId) return;
-    const found = projects.find((p) => p.id === projectId);
-    if (!found) return;
-    if (activeProject?.id === found.id) return;
-
-    setActiveProject(found);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects, projectId]);
-
-  useEffect(() => {
-    if (!activeProject?.id) return;
-
-    setLoading(true);
-    getBuckets(activeProject.id)
-      .then(setBuckets)
-      .catch((error) => {
-        console.error(error);
-        setBuckets([]);
-      })
-      .finally(() => setLoading(false));
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeProject?.id]);
+    if (user && !projectsLoaded) {
+      loadProjects(user.uid, projectId);
+      console.log("123");
+    }
+  }, [user, projectId, loadProjects, projectsLoaded]);
 
   const handleChangeProject = (projectId: string) => {
     const found = projects.find((p) => p.id === projectId);
@@ -158,7 +143,7 @@ export function ProjectSwitcher() {
                         onClick={() => {
                           if (projects.length === 1) {
                             toast.error(
-                              "마지막 프로젝트는 삭제할 수 없습니다.",
+                              "마지막 프로젝트는 삭제할 수 없습니다."
                             );
                             return;
                           }

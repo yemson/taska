@@ -25,7 +25,9 @@ import { Bucket } from "@/types/bucket";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
-  const { buckets, loading } = useBucketStore();
+
+  const buckets = useBucketStore((state) => state.buckets);
+  const loading = useBucketStore((state) => state.loading);
 
   const [newBucketOpen, setNewBucketOpen] = useState(false);
   const [updateBucketOpen, setUpdateBucketOpen] = useState(false);

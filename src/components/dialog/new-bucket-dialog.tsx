@@ -22,8 +22,10 @@ interface NewBucketDialogProps {
 }
 
 export function NewBucketDialog({ open, onOpenChange }: NewBucketDialogProps) {
-  const { setBuckets, setActiveBucket, buckets } = useBucketStore();
-  const { activeProject } = useProjectStore();
+  const buckets = useBucketStore((state) => state.buckets);
+  const setBuckets = useBucketStore((state) => state.setBuckets);
+  const setActiveBucket = useBucketStore((state) => state.setActiveBucket);
+  const activeProject = useProjectStore((state) => state.activeProject);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

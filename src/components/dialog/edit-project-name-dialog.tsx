@@ -26,8 +26,10 @@ export function EditProjectNameDialog({
   onOpenChange,
   editProject,
 }: EditProjectNameDialogProps) {
-  const { setProjects, setActiveProject, projects, activeProject } =
-    useProjectStore();
+  const projects = useProjectStore((state) => state.projects);
+  const setProjects = useProjectStore((state) => state.setProjects);
+  const setActiveProject = useProjectStore((state) => state.setActiveProject);
+  const activeProject = useProjectStore((state) => state.activeProject);
 
   const [title, setTitle] = useState("");
   const [error, setError] = useState("");
