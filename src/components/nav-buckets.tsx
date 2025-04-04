@@ -18,20 +18,28 @@ import {
 } from "@/components/ui/sidebar";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { NewBucketDialog } from "./dialog/new-bucket-dialog";
-import { useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 import { UpdateBucketDialog } from "./dialog/update-bucket-dialog";
 import { Bucket } from "@/types/bucket";
+import { useProjectStore } from "@/store/use-project-store";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
 
+  const activeProject = useProjectStore((state) => state.activeProject);
+
   const buckets = useBucketStore((state) => state.buckets);
-  const loading = useBucketStore((state) => state.loading);
+  const loadBuckets = useBucketStore((state) => state.loadBuckets);
 
   const [newBucketOpen, setNewBucketOpen] = useState(false);
   const [updateBucketOpen, setUpdateBucketOpen] = useState(false);
   const [selectedBucket, setSelectedBucket] = useState<Bucket | null>(null);
+
+  useEffect(() => {
+    if (activeProject) {
+      loadBuckets(activeProject.id);
+    }
+  }, [activeProject, loadBuckets]);
 
   const handleUpdateBucket = (bucket: Bucket) => {
     setSelectedBucket(bucket);
@@ -43,52 +51,36 @@ export function NavProjects() {
       <SidebarGroup className="group-data-[collapsible=icon]:hidden">
         <SidebarGroupLabel>버킷</SidebarGroupLabel>
         <SidebarMenu>
-          {loading ? (
-            <>
-              {[...Array(5)].map((_, index) => (
-                <SidebarMenuItem key={index}>
-                  <SidebarMenuButton asChild>
-                    <Skeleton className="h-8 w-full" />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </>
-          ) : (
-            <>
-              {buckets.map((bucket) => (
-                <SidebarMenuItem key={bucket.title}>
-                  <SidebarMenuButton asChild>
-                    <span>{bucket.title}</span>
-                  </SidebarMenuButton>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuAction showOnHover>
-                        <MoreHorizontal />
-                        <span className="sr-only">새로운 버킷</span>
-                      </SidebarMenuAction>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-48 rounded-lg"
-                      side={isMobile ? "bottom" : "right"}
-                      align={isMobile ? "end" : "start"}
-                    >
-                      <DropdownMenuItem
-                        onClick={() => handleUpdateBucket(bucket)}
-                      >
-                        <PenLine className="text-muted-foreground" />
-                        <span>정보 변경</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem variant="destructive">
-                        <Trash2 className="text-muted-foreground" />
-                        <span>삭제</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>
-              ))}
-            </>
-          )}
+          {buckets.map((bucket) => (
+            <SidebarMenuItem key={bucket.title}>
+              <SidebarMenuButton asChild>
+                <span>{bucket.title}</span>
+              </SidebarMenuButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuAction showOnHover>
+                    <MoreHorizontal />
+                    <span className="sr-only">새로운 버킷</span>
+                  </SidebarMenuAction>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-48 rounded-lg"
+                  side={isMobile ? "bottom" : "right"}
+                  align={isMobile ? "end" : "start"}
+                >
+                  <DropdownMenuItem onClick={() => handleUpdateBucket(bucket)}>
+                    <PenLine className="text-muted-foreground" />
+                    <span>정보 변경</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive">
+                    <Trash2 className="text-muted-foreground" />
+                    <span>삭제</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          ))}
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => setNewBucketOpen(true)}
