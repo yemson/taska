@@ -3,7 +3,8 @@ import { useBucketStore } from "@/store/use-bucket-store";
 import { useEffect } from "react";
 
 export function useLoadBuckets(projectId: string | null) {
-  const { setBuckets, setLoading } = useBucketStore();
+  const setBuckets = useBucketStore((state) => state.setBuckets);
+  const setLoading = useBucketStore((state) => state.setLoading);
 
   useEffect(() => {
     console.log("123");
@@ -24,5 +25,5 @@ export function useLoadBuckets(projectId: string | null) {
     };
 
     load();
-  }, [projectId, setBuckets, setLoading]);
+  }, [projectId]);
 }

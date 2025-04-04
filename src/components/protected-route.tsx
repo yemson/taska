@@ -3,7 +3,9 @@ import { useNavigate, useLocation } from "react-router";
 import { useAuthStore } from "@/store/use-auth-store";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { user, initialized } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const initialized = useAuthStore((state) => state.initialized);
+
   const location = useLocation();
   const navigate = useNavigate();
 

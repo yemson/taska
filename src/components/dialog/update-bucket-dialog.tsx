@@ -27,7 +27,8 @@ export function UpdateBucketDialog({
   onOpenChange,
   bucket,
 }: UpdateBucketDialogProps) {
-  const { buckets, setBuckets } = useBucketStore();
+  const buckets = useBucketStore((state) => state.buckets);
+  const setBuckets = useBucketStore((state) => state.setBuckets);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

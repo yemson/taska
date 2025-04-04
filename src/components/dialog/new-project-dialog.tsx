@@ -26,7 +26,9 @@ export function NewProjectDialog({
   onOpenChange,
 }: NewProjectDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { setProjects, setActiveProject, projects } = useProjectStore();
+  const projects = useProjectStore((state) => state.projects);
+  const setProjects = useProjectStore((state) => state.setProjects);
+  const setActiveProject = useProjectStore((state) => state.setActiveProject);
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
