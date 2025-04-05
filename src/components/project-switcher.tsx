@@ -56,11 +56,9 @@ export function ProjectSwitcher() {
   const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
   const [deleteProjectId, setDeleteProjectId] = useState<string>("");
 
-  // 컴포넌트에서
   useEffect(() => {
     if (user && !projectsLoaded) {
       loadProjects(user.uid, projectId);
-      console.log("123");
     }
   }, [user, projectId, loadProjects, projectsLoaded]);
 
