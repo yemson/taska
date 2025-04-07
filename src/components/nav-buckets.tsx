@@ -1,5 +1,4 @@
 import { MoreHorizontal, Trash2, Plus, PenLine } from "lucide-react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +28,11 @@ export function NavProjects() {
   const activeProject = useProjectStore((state) => state.activeProject);
 
   const buckets = useBucketStore((state) => state.buckets);
+  const activeBucket = useBucketStore((state) => state.activeBucket);
+  const loading = useBucketStore((state) => state.loading);
   const loadBuckets = useBucketStore((state) => state.loadBuckets);
+  const setActiveBucket = useBucketStore((state) => state.setActiveBucket);
+  const resetBucketStore = useBucketStore((state) => state.reset);
 
   const [newBucketOpen, setNewBucketOpen] = useState(false);
   const [updateBucketOpen, setUpdateBucketOpen] = useState(false);
@@ -37,13 +40,29 @@ export function NavProjects() {
 
   useEffect(() => {
     if (activeProject) {
-      loadBuckets(activeProject.id);
+      setActiveBucket(null);
+
+      loadBuckets(activeProject.id).catch((error) => {
+        console.error("버킷 로드 실패: ", error);
+      });
+    } else {
+      resetBucketStore();
     }
-  }, [activeProject, loadBuckets]);
+  }, [activeProject, loadBuckets, setActiveBucket, resetBucketStore]);
+
+  useEffect(() => {
+    if (!loading && buckets.length > 0 && !activeBucket) {
+      setActiveBucket(buckets[0]);
+    }
+  }, [loading, buckets, activeBucket, setActiveBucket]);
 
   const handleUpdateBucket = (bucket: Bucket) => {
     setSelectedBucket(bucket);
     setUpdateBucketOpen(true);
+  };
+
+  const handleSelectBucket = (bucket: Bucket) => {
+    setActiveBucket(bucket);
   };
 
   return (
@@ -52,15 +71,18 @@ export function NavProjects() {
         <SidebarGroupLabel>버킷</SidebarGroupLabel>
         <SidebarMenu>
           {buckets.map((bucket) => (
-            <SidebarMenuItem key={bucket.title}>
-              <SidebarMenuButton asChild>
-                <span>{bucket.title}</span>
+            <SidebarMenuItem key={bucket.id}>
+              <SidebarMenuButton
+                onClick={() => handleSelectBucket(bucket)}
+                className={activeBucket?.id === bucket.id ? "bg-muted" : ""}
+              >
+                {bucket.title}
               </SidebarMenuButton>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuAction showOnHover>
-                    <MoreHorizontal />
-                    <span className="sr-only">새로운 버킷</span>
+                    <MoreHorizontal size={16} />
+                    <span className="sr-only">버킷 옵션</span>
                   </SidebarMenuAction>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -69,12 +91,17 @@ export function NavProjects() {
                   align={isMobile ? "end" : "start"}
                 >
                   <DropdownMenuItem onClick={() => handleUpdateBucket(bucket)}>
-                    <PenLine className="text-muted-foreground" />
+                    <PenLine className="mr-2 h-4 w-4 text-muted-foreground" />{" "}
                     <span>정보 변경</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive">
-                    <Trash2 className="text-muted-foreground" />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() =>
+                      alert(`'${bucket.title}' 삭제 기능 구현 필요`)
+                    }
+                  >
+                    <Trash2 className="mr-2 h-4 w-4 text-muted-foreground" />
                     <span>삭제</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -84,7 +111,7 @@ export function NavProjects() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => setNewBucketOpen(true)}
-              className="text-sidebar-foreground/70"
+              className="text-sidebar-foreground/70 hover:text-sidebar-foreground"
             >
               <Plus className="text-sidebar-foreground/70" />
               <span>새로운 버킷</span>
