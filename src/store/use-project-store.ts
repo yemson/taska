@@ -30,8 +30,6 @@ export const useProjectStore = create<ProjectStore>((set) => ({
       projectsLoaded: false,
     }),
   loadProjects: async (uid: string, activeProjectId?: string) => {
-    set({ loading: true });
-
     try {
       const projects = await getProjects(uid);
       let finalActiveProject: Project | null = null;
