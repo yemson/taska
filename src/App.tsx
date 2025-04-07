@@ -1,20 +1,22 @@
 import { Routes, Route } from "react-router";
 import LoginPage from "@/pages/login-page";
 import { useAuthStore } from "@/store/use-auth-store";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import ProtectedRoute from "@/components/protected-route";
-import DashboardPage from "@/pages/dashboard-page";
 import RegisterPage from "@/pages/register-page";
 import { getProjects, createInitialProject } from "@/lib/projects";
 import { AppLoader } from "./components/app-loader";
 
 function App() {
+  const DashboardPage = lazy(() => import("@/pages/dashboard-page"));
+
   const user = useAuthStore((state) => state.user);
   const initialized = useAuthStore((state) => state.initialized);
   const setUser = useAuthStore((state) => state.setUser);
   const setInitialized = useAuthStore((state) => state.setInitialized);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,9 +50,11 @@ function App() {
       <Route
         path="/dashboard/:projectId"
         element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
+          <Suspense fallback={<AppLoader />}>
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          </Suspense>
         }
       />
       <Route path="/login" element={<LoginPage />} />
