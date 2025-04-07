@@ -34,14 +34,18 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 
     try {
       const projects = await getProjects(uid);
-      set({ projects, projectsLoaded: true });
+      let finalActiveProject: Project | null = null;
 
-      if (activeProjectId && projects.length > 0) {
-        const found = projects.find((p) => p.id === activeProjectId);
-        if (found) {
-          set({ activeProject: found });
-        }
+      if (activeProjectId) {
+        finalActiveProject =
+          projects.find((p) => p.id === activeProjectId) || null;
       }
+
+      set({
+        projects,
+        activeProject: finalActiveProject,
+        projectsLoaded: true,
+      });
     } catch (err) {
       console.error("프로젝트 로딩 실패", err);
       set({ projects: [], projectsLoaded: true });
