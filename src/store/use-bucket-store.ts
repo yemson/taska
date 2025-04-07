@@ -19,13 +19,13 @@ export const useBucketStore = create<BucketStore>((set) => ({
   loading: true,
   setBuckets: (buckets) => set({ buckets }),
   setLoading: (loading) => set({ loading }),
-  setActiveBucket: (project) => set({ activeBucket: project }),
+  setActiveBucket: (buckets) => set({ activeBucket: buckets }),
   reset: () => set({ buckets: [], loading: false, activeBucket: null }),
   loadBuckets: async (projectId: string) => {
     set({ loading: true });
     try {
       const buckets = await getBuckets(projectId);
-      set({ buckets, loading: false });
+      set({ buckets });
     } catch (err) {
       console.error("버킷 로딩 실패", err);
       set({ buckets: [] });
