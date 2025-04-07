@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router";
 import LoginPage from "@/pages/login-page";
 import { useAuthStore } from "@/store/use-auth-store";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import ProtectedRoute from "@/components/protected-route";
