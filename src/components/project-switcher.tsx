@@ -29,38 +29,25 @@ import {
 } from "@/components/ui/sidebar";
 import { useProjectStore } from "@/store/use-project-store";
 import { Project } from "@/types/project";
-import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { DeleteProjectAlertDialog } from "./dialog/delete-project-alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuthStore } from "@/store/use-auth-store";
 
 export function ProjectSwitcher() {
   const { isMobile } = useSidebar();
-  const { projectId } = useParams();
   const navigate = useNavigate();
-
-  const user = useAuthStore((state) => state.user);
 
   const activeProject = useProjectStore((state) => state.activeProject);
   const setActiveProject = useProjectStore((state) => state.setActiveProject);
   const projects = useProjectStore((state) => state.projects);
   const loading = useProjectStore((state) => state.loading);
-  const loadProjects = useProjectStore((state) => state.loadProjects);
-  const projectsLoaded = useProjectStore((state) => state.projectsLoaded);
 
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [editProjectNameOpen, setEditProjectNameOpen] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
   const [deleteProjectId, setDeleteProjectId] = useState<string>("");
-
-  useEffect(() => {
-    if (user && !projectsLoaded) {
-      loadProjects(user.uid, projectId);
-    }
-  }, [user, projectId, loadProjects, projectsLoaded]);
 
   const handleChangeProject = (projectId: string) => {
     const found = projects.find((p) => p.id === projectId);

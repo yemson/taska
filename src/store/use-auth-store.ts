@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import { User } from "firebase/auth";
 
 interface AuthState {
@@ -8,9 +9,21 @@ interface AuthState {
   setUser: (user: User | null) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  initialized: false,
-  setInitialized: (initialized: boolean) => set({ initialized }),
-  setUser: (user) => set({ user }),
-}));
+const storeName = "auth";
+
+export const useAuthStore = create<AuthState>()(
+  devtools(
+    (set) => ({
+      user: null,
+      initialized: false,
+
+      setInitialized: (initialized: boolean) =>
+        set({ initialized }, false, `${storeName}/setInitialized`),
+
+      setUser: (user) => set({ user }, false, `${storeName}/setUser`),
+    }),
+    {
+      name: "AuthStore",
+    }
+  )
+);

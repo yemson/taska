@@ -17,13 +17,10 @@ function App() {
   const setUser = useAuthStore((state) => state.setUser);
   const setInitialized = useAuthStore((state) => state.setInitialized);
 
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setInitialized(true);
-      setLoading(false);
     });
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -42,8 +39,6 @@ function App() {
 
     ensureDefaultProject();
   }, [user, initialized]);
-
-  if (loading) return <AppLoader />;
 
   return (
     <Routes>

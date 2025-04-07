@@ -9,13 +9,14 @@ import {
   query,
   serverTimestamp,
   where,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
 export async function getBuckets(projectId: string): Promise<Bucket[]> {
   const q = query(
     collection(db, "buckets"),
-    where("projectId", "==", projectId),
+    where("projectId", "==", projectId)
   );
 
   const snapshot = await getDocs(q);
@@ -28,7 +29,7 @@ export async function getBuckets(projectId: string): Promise<Bucket[]> {
 export async function createBucket(
   projectId: string,
   title: string,
-  description: string = "",
+  description: string = ""
 ): Promise<Bucket> {
   const docRef = await addDoc(collection(db, "buckets"), {
     projectId,
@@ -48,7 +49,7 @@ export async function createBucket(
 export async function updateBucket(
   id: string,
   title: string,
-  description: string = "",
+  description: string = ""
 ): Promise<Bucket> {
   const bucketRef = doc(db, "buckets", id);
 
@@ -63,6 +64,11 @@ export async function updateBucket(
     id: snapshot.id,
     ...(snapshot.data() as Omit<Bucket, "id">),
   };
+}
+
+export async function deleteBucket(id: string) {
+  const bucketRef = doc(db, "buckets", id);
+  await deleteDoc(bucketRef);
 }
 
 // export async function createProject(

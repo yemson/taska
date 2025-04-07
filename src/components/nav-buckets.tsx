@@ -17,44 +17,20 @@ import {
 } from "@/components/ui/sidebar";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { NewBucketDialog } from "./dialog/new-bucket-dialog";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UpdateBucketDialog } from "./dialog/update-bucket-dialog";
 import { Bucket } from "@/types/bucket";
-import { useProjectStore } from "@/store/use-project-store";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
 
-  const activeProject = useProjectStore((state) => state.activeProject);
-
   const buckets = useBucketStore((state) => state.buckets);
   const activeBucket = useBucketStore((state) => state.activeBucket);
-  const loading = useBucketStore((state) => state.loading);
-  const loadBuckets = useBucketStore((state) => state.loadBuckets);
   const setActiveBucket = useBucketStore((state) => state.setActiveBucket);
-  const resetBucketStore = useBucketStore((state) => state.reset);
 
   const [newBucketOpen, setNewBucketOpen] = useState(false);
   const [updateBucketOpen, setUpdateBucketOpen] = useState(false);
   const [selectedBucket, setSelectedBucket] = useState<Bucket | null>(null);
-
-  useEffect(() => {
-    if (activeProject) {
-      setActiveBucket(null);
-
-      loadBuckets(activeProject.id).catch((error) => {
-        console.error("버킷 로드 실패: ", error);
-      });
-    } else {
-      resetBucketStore();
-    }
-  }, [activeProject, loadBuckets, setActiveBucket, resetBucketStore]);
-
-  useEffect(() => {
-    if (!loading && buckets.length > 0 && !activeBucket) {
-      setActiveBucket(buckets[0]);
-    }
-  }, [loading, buckets, activeBucket, setActiveBucket]);
 
   const handleUpdateBucket = (bucket: Bucket) => {
     setSelectedBucket(bucket);
