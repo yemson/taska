@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/protected-route";
 import RegisterPage from "@/pages/register-page";
 import { getProjects, createInitialProject } from "@/lib/projects";
 import { AppLoader } from "./components/app-loader";
+import { ThemeProvider } from "@/components/theme-provider";
 
 function App() {
   const DashboardPage = lazy(() => import("@/pages/dashboard-page"));
@@ -41,21 +42,23 @@ function App() {
   }, [user, initialized]);
 
   return (
-    <Routes>
-      <Route
-        path="/dashboard/:projectId"
-        element={
-          <Suspense fallback={<AppLoader />}>
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          </Suspense>
-        }
-      />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/" element={<div>asdf</div>} />
-    </Routes>
+    <ThemeProvider defaultTheme="system" storageKey="taska-theme">
+      <Routes>
+        <Route
+          path="/dashboard/:projectId"
+          element={
+            <Suspense fallback={<AppLoader />}>
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            </Suspense>
+          }
+        />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<div>asdf</div>} />
+      </Routes>
+    </ThemeProvider>
   );
 }
 

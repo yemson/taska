@@ -9,7 +9,7 @@ interface BucketStore {
   loading: boolean;
   setBuckets: (p: Bucket[]) => void;
   setLoading: (l: boolean) => void;
-  setActiveBucket: (bucket: Bucket | null) => void; // 파라미터 이름 수정됨
+  setActiveBucket: (bucket: Bucket | null) => void;
   reset: () => void;
   loadBuckets: (projectId: string, bucketId?: string) => Promise<void>;
 }

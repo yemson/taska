@@ -118,17 +118,17 @@ export default function DashboardPage() {
           </div>
         ) : activeBucket ? (
           // 활성 버킷 있을 때 컨텐츠 표시 (기존 코드)
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="grid auto-rows-min gap-4 lg:grid-cols-3">
               <WeeklyTaskChart />
               <TotalTaskChart />
               <div className="rounded-xl bg-muted/50" />
             </div>
             <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-          </div>
+          </main>
         ) : (
           // 로딩 완료 & 활성 버킷 없을 때 메시지 표시 (기존 코드)
-          <div className="flex h-full flex-1 items-center justify-center">
+          <main className="flex h-full flex-1 items-center justify-center">
             {" "}
             {/* flex-1 추가 */}
             <div className="text-center space-y-1">
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                 사이드바에서 버킷을 선택하여 작업을 시작하세요.
               </p>
             </div>
-          </div>
+          </main>
         )}
       </SidebarInset>
     </SidebarProvider>
