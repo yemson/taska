@@ -67,52 +67,12 @@ export async function updateBucket(
 }
 
 export async function deleteBucket(id: string) {
-  const bucketRef = doc(db, "buckets", id);
-  await deleteDoc(bucketRef);
+  const tasks = await getDocs(
+    query(collection(db, "tasks"), where("bucketId", "==", id))
+  );
+
+  await Promise.all([
+    ...tasks.docs.map((doc) => deleteDoc(doc.ref)),
+    deleteDoc(doc(db, "buckets", id)),
+  ]);
 }
-
-// export async function createProject(
-//   title: string,
-//   uid: string,
-// ): Promise<Project> {
-//   const docRef = await addDoc(collection(db, "projects"), {
-//     title,
-//     createdAt: serverTimestamp(),
-//     owner: uid,
-//     members: [uid],
-//   });
-
-//   const snapshot = await getDoc(docRef);
-
-//   return {
-//     id: snapshot.id,
-//     ...(snapshot.data() as Omit<Project, "id">),
-//   };
-// }
-
-// export async function createInitialProject(uid: string) {
-//   await createProject("기본 프로젝트", uid);
-// }
-
-// export async function renameProject(id: string, newTitle: string) {
-//   const projectRef = doc(db, "projects", id);
-//   await updateDoc(projectRef, {
-//     title: newTitle,
-//   });
-// }
-
-// export async function deleteProject(id: string) {
-//   const buckets = await getDocs(
-//     query(collection(db, "buckets"), where("projectId", "==", id)),
-//   );
-
-//   const tasks = await getDocs(
-//     query(collection(db, "tasks"), where("projectId", "==", id)),
-//   );
-
-//   await Promise.all([
-//     ...buckets.docs.map((doc) => deleteDoc(doc.ref)),
-//     ...tasks.docs.map((doc) => deleteDoc(doc.ref)),
-//     deleteDoc(doc(db, "projects", id)), // 🔥 이거 하나면 충분함
-//   ]);
-// }

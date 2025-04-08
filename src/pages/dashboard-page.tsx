@@ -17,12 +17,15 @@ import { useProjectStore } from "@/store/use-project-store";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { WeeklyTaskChart } from "@/components/chart/weekly-task-chart";
 import { TotalTaskChart } from "@/components/chart/total-task-chart";
 
 export default function DashboardPage() {
   const { projectId } = useParams();
+  const [searchParams] = useSearchParams();
+
+  const bucketId = searchParams.get("bucketId") || "";
 
   const user = useAuthStore((state) => state.user);
 
@@ -31,6 +34,8 @@ export default function DashboardPage() {
   const activeProject = useProjectStore((state) => state.activeProject);
 
   const loadBuckets = useBucketStore((state) => state.loadBuckets);
+  const setActiveBucket = useBucketStore((state) => state.setActiveBucket);
+  const buckets = useBucketStore((state) => state.buckets);
   const activeBucket = useBucketStore((state) => state.activeBucket);
   const loading = useBucketStore((state) => state.loading);
 
@@ -49,6 +54,17 @@ export default function DashboardPage() {
       loadBuckets(activeProject.id);
     }
   }, [activeProject, loadBuckets]);
+
+  // 쿼리에 bucketId가 있을 때 해당 버킷 setActiveBucket
+  // 프로젝트는 한번만 로드하면 되는데 버킷은 프로젝트 바뀔 때 마다 바뀌기 때문에 걍 loadBuckets에서 처리 안 함
+  useEffect(() => {
+    if (activeProject && bucketId && buckets.length > 0) {
+      const bucket = buckets.find((bucket) => bucket.id === bucketId);
+      if (bucket) {
+        setActiveBucket(bucket);
+      }
+    }
+  }, [activeProject, bucketId, setActiveBucket, buckets]);
 
   // 최소 로딩 시간
   useEffect(() => {

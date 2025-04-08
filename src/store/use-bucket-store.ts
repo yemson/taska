@@ -11,7 +11,7 @@ interface BucketStore {
   setLoading: (l: boolean) => void;
   setActiveBucket: (bucket: Bucket | null) => void; // 파라미터 이름 수정됨
   reset: () => void;
-  loadBuckets: (projectId: string) => Promise<void>;
+  loadBuckets: (projectId: string, bucketId?: string) => Promise<void>;
 }
 
 const storeName = "bucket";
@@ -39,15 +39,15 @@ export const useBucketStore = create<BucketStore>()(
           `${storeName}/reset`
         ),
 
-      loadBuckets: async (projectId: string) => {
+      loadBuckets: async (projectId: string, bucketId?: string) => {
         set({ loading: true }, false, `${storeName}/loadBuckets/start`);
 
         try {
           const buckets = await getBuckets(projectId);
           let finalActiveBucket: Bucket | null = null;
 
-          if (buckets.length > 0) {
-            finalActiveBucket = buckets[0];
+          if (bucketId) {
+            finalActiveBucket = buckets.find((b) => b.id === bucketId) || null;
           }
 
           set(

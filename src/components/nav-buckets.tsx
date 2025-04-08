@@ -20,9 +20,12 @@ import { NewBucketDialog } from "./dialog/new-bucket-dialog";
 import { useState } from "react";
 import { UpdateBucketDialog } from "./dialog/update-bucket-dialog";
 import { Bucket } from "@/types/bucket";
+import { useNavigate } from "react-router";
+import { DeleteBucketAlertDialog } from "./dialog/delete-bucket-alert-dialog";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
 
   const buckets = useBucketStore((state) => state.buckets);
   const activeBucket = useBucketStore((state) => state.activeBucket);
@@ -31,6 +34,8 @@ export function NavProjects() {
   const [newBucketOpen, setNewBucketOpen] = useState(false);
   const [updateBucketOpen, setUpdateBucketOpen] = useState(false);
   const [selectedBucket, setSelectedBucket] = useState<Bucket | null>(null);
+  const [deleteBucketOpen, setDeleteProjectOpen] = useState(false);
+  const [deleteBucketId, setDeleteProjectId] = useState<string>("");
 
   const handleUpdateBucket = (bucket: Bucket) => {
     setSelectedBucket(bucket);
@@ -39,6 +44,15 @@ export function NavProjects() {
 
   const handleSelectBucket = (bucket: Bucket) => {
     setActiveBucket(bucket);
+
+    navigate({
+      search: `?bucketId=${bucket.id}`,
+    });
+  };
+
+  const handleDeleteBucket = async (bucketId: string) => {
+    setDeleteProjectId(bucketId);
+    setDeleteProjectOpen(true);
   };
 
   return (
@@ -73,9 +87,7 @@ export function NavProjects() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onClick={() =>
-                      alert(`'${bucket.title}' 삭제 기능 구현 필요`)
-                    }
+                    onClick={() => handleDeleteBucket(bucket.id)}
                   >
                     <Trash2 className="mr-2 h-4 w-4 text-muted-foreground" />
                     <span>삭제</span>
@@ -101,6 +113,11 @@ export function NavProjects() {
         open={updateBucketOpen}
         onOpenChange={setUpdateBucketOpen}
         bucket={selectedBucket}
+      />
+      <DeleteBucketAlertDialog
+        open={deleteBucketOpen}
+        onOpenChange={setDeleteProjectOpen}
+        bucketId={deleteBucketId}
       />
     </>
   );

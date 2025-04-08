@@ -165,6 +165,7 @@ export function ProjectSwitcher() {
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
+
       <NewProjectDialog
         open={newProjectOpen}
         onOpenChange={setNewProjectOpen}

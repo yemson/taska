@@ -16,7 +16,7 @@ import { Project } from "@/types/project";
 export async function getProjects(uid: string): Promise<Project[]> {
   const q = query(
     collection(db, "projects"),
-    where("members", "array-contains", uid),
+    where("members", "array-contains", uid)
   );
 
   const snapshot = await getDocs(q);
@@ -33,7 +33,7 @@ export async function getProjects(uid: string): Promise<Project[]> {
 
 export async function createProject(
   title: string,
-  uid: string,
+  uid: string
 ): Promise<Project> {
   const docRef = await addDoc(collection(db, "projects"), {
     title,
@@ -63,16 +63,16 @@ export async function renameProject(id: string, newTitle: string) {
 
 export async function deleteProject(id: string) {
   const buckets = await getDocs(
-    query(collection(db, "buckets"), where("projectId", "==", id)),
+    query(collection(db, "buckets"), where("projectId", "==", id))
   );
 
   const tasks = await getDocs(
-    query(collection(db, "tasks"), where("projectId", "==", id)),
+    query(collection(db, "tasks"), where("projectId", "==", id))
   );
 
   await Promise.all([
     ...buckets.docs.map((doc) => deleteDoc(doc.ref)),
     ...tasks.docs.map((doc) => deleteDoc(doc.ref)),
-    deleteDoc(doc(db, "projects", id)), // 🔥 이거 하나면 충분함
+    deleteDoc(doc(db, "projects", id)),
   ]);
 }
