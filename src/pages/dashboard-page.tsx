@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { WeeklyTaskChart } from "@/components/chart/weekly-task-chart";
 import { TotalTaskChart } from "@/components/chart/total-task-chart";
+import CompletedTaskCard from "@/components/completed-task-card";
 
 export default function DashboardPage() {
   const { projectId } = useParams();
@@ -122,7 +123,7 @@ export default function DashboardPage() {
             <div className="grid auto-rows-min gap-4 lg:grid-cols-3">
               <WeeklyTaskChart />
               <TotalTaskChart />
-              <div className="rounded-xl bg-muted/50" />
+              <CompletedTaskCard />
             </div>
             <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
           </main>
