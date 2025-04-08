@@ -1,3 +1,4 @@
+import { LoaderCircle } from "lucide-react";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -15,8 +16,10 @@ import {
 import { useProjectStore } from "@/store/use-project-store";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { useAuthStore } from "@/store/use-auth-store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { WeeklyTaskChart } from "@/components/chart/weekly-task-chart";
+import { TotalTaskChart } from "@/components/chart/total-task-chart";
 
 export default function DashboardPage() {
   const { projectId } = useParams();
@@ -31,6 +34,8 @@ export default function DashboardPage() {
   const activeBucket = useBucketStore((state) => state.activeBucket);
   const loading = useBucketStore((state) => state.loading);
 
+  const [delayedLoading, setDelayedLoading] = useState(true);
+
   // 프로젝트 로드
   useEffect(() => {
     if (user && !projectsLoaded) {
@@ -44,6 +49,26 @@ export default function DashboardPage() {
       loadBuckets(activeProject.id);
     }
   }, [activeProject, loadBuckets]);
+
+  // 최소 로딩 시간
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (loading) {
+      setDelayedLoading(true);
+      timeout = setTimeout(() => {
+        if (!loading) {
+          setDelayedLoading(false);
+        }
+      }, 300);
+    } else {
+      timeout = setTimeout(() => {
+        setDelayedLoading(false);
+      }, 300);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
   return (
     <SidebarProvider>
@@ -71,22 +96,17 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {loading ? (
+        {delayedLoading ? (
           <div className="flex h-full w-full items-center justify-center">
-            <div className="text-center space-y-1">
-              <h1 className="text-2xl font-bold">버킷을 로딩 중입니다...</h1>
-              <p className="text-sm text-muted-foreground">
-                버킷을 로딩 중입니다. 잠시만 기다려 주세요.
-              </p>
-            </div>
+            <LoaderCircle className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : activeBucket ? (
           // 활성 버킷 있을 때 컨텐츠 표시 (기존 코드)
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-              <div className="aspect-video rounded-xl bg-muted/50" />
-              <div className="aspect-video rounded-xl bg-muted/50" />
-              <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="grid auto-rows-min gap-4 lg:grid-cols-3">
+              <WeeklyTaskChart />
+              <TotalTaskChart />
+              <div className="rounded-xl bg-muted/50" />
             </div>
             <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
           </div>
