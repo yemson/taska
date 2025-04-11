@@ -27,7 +27,7 @@ Tailwind CSS와 shadcn/ui를 활용하여 깔끔하고 현대적인 UI를 구성
 
 ## 프로젝트 구조
 
-![다이어그램](/public/diagram.png)
+![다이어그램](https://github.com/user-attachments/assets/9fdcb88b-aab4-455e-9997-0a6394a42ec3)
 
 ## 예정
 
