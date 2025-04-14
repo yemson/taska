@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createBucket } from "@/lib/buckets";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { toast } from "sonner";
@@ -17,11 +17,11 @@ import { useProjectStore } from "@/store/use-project-store";
 import { Textarea } from "@/components/ui/textarea";
 
 interface NewBucketDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function NewBucketDialog({ open, onOpenChange }: NewBucketDialogProps) {
+export function NewBucketDialog({ isOpen, onClose }: NewBucketDialogProps) {
   const buckets = useBucketStore((state) => state.buckets);
   const setBuckets = useBucketStore((state) => state.setBuckets);
   const setActiveBucket = useBucketStore((state) => state.setActiveBucket);
@@ -31,31 +31,32 @@ export function NewBucketDialog({ open, onOpenChange }: NewBucketDialogProps) {
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setTitle("");
-    setDescription("");
-    setError("");
-  }, [open]);
-
   const handleSubmit = async () => {
     if (!title.trim()) {
       setError("버킷 이름을 입력하세요.");
       return;
     }
 
-    const newBucket = await createBucket(activeProject!.id, title, description);
-    setBuckets([newBucket, ...buckets]);
-    setActiveBucket(newBucket);
-    onOpenChange(false);
-    setTitle("");
-    setDescription("");
-    setError("");
+    try {
+      const newBucket = await createBucket(
+        activeProject!.id,
+        title,
+        description
+      );
+      setBuckets([newBucket, ...buckets]);
+      setActiveBucket(newBucket);
 
-    toast.success("새로운 버킷이 생성되었습니다.");
+      toast.success("새로운 버킷이 생성되었습니다.");
+    } catch (err) {
+      console.error("버킷 생성 중 오류 발생:", err);
+      setError("버킷 생성에 실패했습니다.");
+    } finally {
+      onClose();
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>새로운 버킷</DialogTitle>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createProject } from "@/lib/projects";
 import { useAuthStore } from "@/store/use-auth-store";
 import { useProjectStore } from "@/store/use-project-store";
@@ -17,14 +17,11 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 interface NewProjectDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function NewProjectDialog({
-  open,
-  onOpenChange,
-}: NewProjectDialogProps) {
+export function NewProjectDialog({ isOpen, onClose }: NewProjectDialogProps) {
   const user = useAuthStore((state) => state.user);
   const projects = useProjectStore((state) => state.projects);
   const setProjects = useProjectStore((state) => state.setProjects);
@@ -34,30 +31,30 @@ export function NewProjectDialog({
   const [title, setTitle] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setTitle("");
-    setError("");
-  }, [open]);
-
   const handleSubmit = async () => {
     if (!title.trim()) {
       setError("프로젝트 이름을 입력하세요.");
       return;
     }
 
-    const newProject = await createProject(title, user!.uid);
-    setProjects([newProject, ...projects]);
-    setActiveProject(newProject);
-    navigate(`/dashboard/${newProject.id}`);
-    onOpenChange(false);
-    setTitle("");
-    setError("");
+    try {
+      const newProject = await createProject(title, user!.uid);
+      setProjects([newProject, ...projects]);
+      setActiveProject(newProject);
+      navigate(`/dashboard/${newProject.id}`);
+      onClose();
 
-    toast.success("새로운 프로젝트가 생성되었습니다.");
+      toast.success("새로운 프로젝트가 생성되었습니다.");
+    } catch (err) {
+      console.error("프로젝트 생성 중 오류 발생:", err);
+      setError("프로젝트 생성에 실패했습니다.");
+    } finally {
+      onClose();
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>새로운 프로젝트</DialogTitle>

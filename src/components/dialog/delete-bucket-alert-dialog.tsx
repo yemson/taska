@@ -12,17 +12,18 @@ import { toast } from "sonner";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { useNavigate } from "react-router";
 import { deleteBucket } from "@/lib/buckets";
+import { Bucket } from "@/types/bucket";
 
 interface DeleteBucketAlertDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  bucketId: string;
+  isOpen: boolean;
+  onClose: () => void;
+  bucket: Bucket | null;
 }
 
 export function DeleteBucketAlertDialog({
-  open,
-  onOpenChange,
-  bucketId,
+  isOpen,
+  onClose,
+  bucket,
 }: DeleteBucketAlertDialogProps) {
   const buckets = useBucketStore((state) => state.buckets);
   const setBuckets = useBucketStore((state) => state.setBuckets);
@@ -32,6 +33,7 @@ export function DeleteBucketAlertDialog({
 
   const handleSubmit = async () => {
     try {
+      const bucketId = bucket!.id;
       await deleteBucket(bucketId);
       const updated = buckets.filter((b) => b.id !== bucketId);
 
@@ -54,13 +56,12 @@ export function DeleteBucketAlertDialog({
       toast.error("버킷 삭제를 실패했습니다.");
       console.error(err);
     } finally {
-      onOpenChange(false);
+      onClose();
     }
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      {/* <AlertDialogTrigger>asdf</AlertDialogTrigger> */}
+    <AlertDialog open={isOpen} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>정말 버킷을 삭제하시겠습니까?</AlertDialogTitle>

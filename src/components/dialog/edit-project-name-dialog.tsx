@@ -11,35 +11,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useProjectStore } from "@/store/use-project-store";
 import { Project } from "@/types/project";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { renameProject } from "@/lib/projects";
 import { toast } from "sonner";
 
 interface EditProjectNameDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  editProject: Project | null;
+  isOpen: boolean;
+  onClose: () => void;
+  project: Project | null;
 }
 
 export function EditProjectNameDialog({
-  open,
-  onOpenChange,
-  editProject,
+  isOpen,
+  onClose,
+  project,
 }: EditProjectNameDialogProps) {
   const projects = useProjectStore((state) => state.projects);
   const setProjects = useProjectStore((state) => state.setProjects);
   const setActiveProject = useProjectStore((state) => state.setActiveProject);
   const activeProject = useProjectStore((state) => state.activeProject);
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(project?.title || "");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (editProject) {
-      setTitle(editProject.title || "");
-      setError("");
-    }
-  }, [open, editProject]);
 
   const handleSubmit = async () => {
     if (!title.trim()) {
@@ -48,31 +41,26 @@ export function EditProjectNameDialog({
     }
 
     try {
-      await renameProject(editProject!.id, title);
-
+      await renameProject(project!.id, title);
       const updated = projects.map((p) =>
-        p.id === editProject!.id ? { ...p, title } : p,
+        p.id === project!.id ? { ...p, title } : p
       );
-
       setProjects(updated);
-
-      if (editProject!.id === activeProject?.id) {
-        setActiveProject({ ...editProject!, title });
+      if (project!.id === activeProject?.id) {
+        setActiveProject({ ...project!, title });
       }
-
-      onOpenChange(false);
-      setTitle("");
-      setError("");
 
       toast.success("프로젝트 이름이 변경되었습니다.");
     } catch (err) {
       console.error("이름 변경 중 오류 발생:", err);
       setError("이름 변경에 실패했습니다.");
+    } finally {
+      onClose();
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>프로젝트 이름 변경</DialogTitle>

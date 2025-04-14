@@ -5,7 +5,6 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
 
 import { EditProjectNameDialog } from "@/components/dialog/edit-project-name-dialog";
 import { NewProjectDialog } from "@/components/dialog/new-project-dialog";
@@ -28,11 +27,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useProjectStore } from "@/store/use-project-store";
-import { Project } from "@/types/project";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { DeleteProjectAlertDialog } from "./dialog/delete-project-alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { overlay } from "overlay-kit";
 
 export function ProjectSwitcher() {
   const { isMobile } = useSidebar();
@@ -43,27 +42,11 @@ export function ProjectSwitcher() {
   const projects = useProjectStore((state) => state.projects);
   const loading = useProjectStore((state) => state.loading);
 
-  const [newProjectOpen, setNewProjectOpen] = useState(false);
-  const [editProjectNameOpen, setEditProjectNameOpen] = useState(false);
-  const [editProject, setEditProject] = useState<Project | null>(null);
-  const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
-  const [deleteProjectId, setDeleteProjectId] = useState<string>("");
-
   const handleChangeProject = (projectId: string) => {
     const found = projects.find((p) => p.id === projectId);
     if (!found) return;
     setActiveProject(found);
     navigate(`/dashboard/${projectId}`);
-  };
-
-  const handleEditProject = (project: Project) => {
-    setEditProject(project);
-    setEditProjectNameOpen(true);
-  };
-
-  const handleDeleteProject = async (projectId: string) => {
-    setDeleteProjectId(projectId);
-    setDeleteProjectOpen(true);
   };
 
   if (!activeProject || loading) {
@@ -117,7 +100,18 @@ export function ProjectSwitcher() {
                         <span>보기</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleEditProject(project)}
+                        onClick={() => {
+                          overlay.open(({ isOpen, close, unmount }) => (
+                            <EditProjectNameDialog
+                              isOpen={isOpen}
+                              onClose={() => {
+                                close();
+                                setTimeout(unmount, 300);
+                              }}
+                              project={project}
+                            />
+                          ));
+                        }}
                       >
                         <PenLine className="text-muted-foreground" />
                         <span>이름 변경</span>
@@ -133,7 +127,16 @@ export function ProjectSwitcher() {
                             return;
                           }
 
-                          handleDeleteProject(project.id);
+                          overlay.open(({ isOpen, close, unmount }) => (
+                            <DeleteProjectAlertDialog
+                              isOpen={isOpen}
+                              onClose={() => {
+                                close();
+                                setTimeout(unmount, 300);
+                              }}
+                              project={project}
+                            />
+                          ));
                         }}
                       >
                         <Trash2 className="text-muted-foreground" />
@@ -150,7 +153,16 @@ export function ProjectSwitcher() {
                     toast.warning("프로젝트는 5개까지 생성 가능합니다.");
                     return;
                   }
-                  setNewProjectOpen(true);
+
+                  overlay.open(({ isOpen, close, unmount }) => (
+                    <NewProjectDialog
+                      isOpen={isOpen}
+                      onClose={() => {
+                        close();
+                        setTimeout(unmount, 300);
+                      }}
+                    />
+                  ));
                 }}
                 className="gap-2 p-2"
               >
@@ -165,21 +177,6 @@ export function ProjectSwitcher() {
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-
-      <NewProjectDialog
-        open={newProjectOpen}
-        onOpenChange={setNewProjectOpen}
-      />
-      <EditProjectNameDialog
-        open={editProjectNameOpen}
-        onOpenChange={setEditProjectNameOpen}
-        editProject={editProject}
-      />
-      <DeleteProjectAlertDialog
-        open={deleteProjectOpen}
-        onOpenChange={setDeleteProjectOpen}
-        projectId={deleteProjectId}
-      />
     </>
   );
 }

@@ -11,36 +11,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { Bucket } from "@/types/bucket";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { updateBucket } from "@/lib/buckets";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 
 interface UpdateBucketDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
   bucket: Bucket | null;
 }
 
 export function UpdateBucketDialog({
-  open,
-  onOpenChange,
+  isOpen,
+  onClose,
   bucket,
 }: UpdateBucketDialogProps) {
   const buckets = useBucketStore((state) => state.buckets);
   const setBuckets = useBucketStore((state) => state.setBuckets);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(bucket?.title || "");
+  const [description, setDescription] = useState(bucket?.description || "");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (bucket) {
-      setTitle(bucket.title || "");
-      setDescription(bucket.description || "");
-      setError("");
-    }
-  }, [open, bucket]);
 
   const handleSubmit = async () => {
     if (!title.trim()) {
@@ -50,16 +42,11 @@ export function UpdateBucketDialog({
 
     try {
       await updateBucket(bucket!.id, title, description);
-
       const updated = buckets.map((b) =>
-        b.id === bucket!.id ? { ...b, title } : b,
+        b.id === bucket!.id ? { ...b, title } : b
       );
-
       setBuckets(updated);
-
-      onOpenChange(false);
-      setTitle("");
-      setError("");
+      onClose();
 
       toast.success("버킷 정보가 변경되었습니다.");
     } catch (err) {
@@ -69,7 +56,7 @@ export function UpdateBucketDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>버킷 정보 변경</DialogTitle>

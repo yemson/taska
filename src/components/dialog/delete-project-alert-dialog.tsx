@@ -12,17 +12,18 @@ import { deleteProject } from "@/lib/projects";
 import { toast } from "sonner";
 import { useProjectStore } from "@/store/use-project-store";
 import { useNavigate } from "react-router";
+import { Project } from "@/types/project";
 
 interface DeleteProjectAlertDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  projectId: string;
+  isOpen: boolean;
+  project: Project | null;
+  onClose: () => void;
 }
 
 export function DeleteProjectAlertDialog({
-  open,
-  onOpenChange,
-  projectId,
+  isOpen,
+  project,
+  onClose,
 }: DeleteProjectAlertDialogProps) {
   const projects = useProjectStore((state) => state.projects);
   const setProjects = useProjectStore((state) => state.setProjects);
@@ -32,9 +33,9 @@ export function DeleteProjectAlertDialog({
 
   const handleSubmit = async () => {
     try {
+      const projectId = project!.id;
       await deleteProject(projectId);
       const updated = projects.filter((p) => p.id !== projectId);
-
       if (activeProject?.id === projectId && updated.length > 0) {
         setActiveProject(updated[0]);
         navigate(`/dashboard/${updated[0].id}`);
@@ -45,13 +46,13 @@ export function DeleteProjectAlertDialog({
       toast.error("프로젝트 삭제에 실패했습니다.");
       console.error(err);
     } finally {
-      onOpenChange(false);
+      onClose();
+      toast.success("프로젝트가 삭제되었습니다.");
     }
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      {/* <AlertDialogTrigger>asdf</AlertDialogTrigger> */}
+    <AlertDialog open={isOpen} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>정말 프로젝트를 삭제하시겠습니까?</AlertDialogTitle>

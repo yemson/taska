@@ -17,11 +17,11 @@ import {
 } from "@/components/ui/sidebar";
 import { useBucketStore } from "@/store/use-bucket-store";
 import { NewBucketDialog } from "./dialog/new-bucket-dialog";
-import { useState } from "react";
 import { UpdateBucketDialog } from "./dialog/update-bucket-dialog";
 import { Bucket } from "@/types/bucket";
 import { useNavigate } from "react-router";
 import { DeleteBucketAlertDialog } from "./dialog/delete-bucket-alert-dialog";
+import { overlay } from "overlay-kit";
 
 export function NavProjects() {
   const { isMobile } = useSidebar();
@@ -31,28 +31,12 @@ export function NavProjects() {
   const activeBucket = useBucketStore((state) => state.activeBucket);
   const setActiveBucket = useBucketStore((state) => state.setActiveBucket);
 
-  const [newBucketOpen, setNewBucketOpen] = useState(false);
-  const [updateBucketOpen, setUpdateBucketOpen] = useState(false);
-  const [selectedBucket, setSelectedBucket] = useState<Bucket | null>(null);
-  const [deleteBucketOpen, setDeleteProjectOpen] = useState(false);
-  const [deleteBucketId, setDeleteProjectId] = useState<string>("");
-
-  const handleUpdateBucket = (bucket: Bucket) => {
-    setSelectedBucket(bucket);
-    setUpdateBucketOpen(true);
-  };
-
   const handleSelectBucket = (bucket: Bucket) => {
     setActiveBucket(bucket);
 
     navigate({
       search: `?bucketId=${bucket.id}`,
     });
-  };
-
-  const handleDeleteBucket = async (bucketId: string) => {
-    setDeleteProjectId(bucketId);
-    setDeleteProjectOpen(true);
   };
 
   return (
@@ -80,14 +64,38 @@ export function NavProjects() {
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >
-                  <DropdownMenuItem onClick={() => handleUpdateBucket(bucket)}>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      overlay.open(({ isOpen, close, unmount }) => (
+                        <UpdateBucketDialog
+                          isOpen={isOpen}
+                          onClose={() => {
+                            close();
+                            setTimeout(unmount, 300);
+                          }}
+                          bucket={bucket}
+                        />
+                      ));
+                    }}
+                  >
                     <PenLine className="mr-2 h-4 w-4 text-muted-foreground" />{" "}
                     <span>정보 변경</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     variant="destructive"
-                    onClick={() => handleDeleteBucket(bucket.id)}
+                    onClick={() => {
+                      overlay.open(({ isOpen, close, unmount }) => (
+                        <DeleteBucketAlertDialog
+                          isOpen={isOpen}
+                          onClose={() => {
+                            close();
+                            setTimeout(unmount, 300);
+                          }}
+                          bucket={bucket}
+                        />
+                      ));
+                    }}
                   >
                     <Trash2 className="mr-2 h-4 w-4 text-muted-foreground" />
                     <span>삭제</span>
@@ -98,7 +106,17 @@ export function NavProjects() {
           ))}
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => setNewBucketOpen(true)}
+              onClick={() => {
+                overlay.open(({ isOpen, close, unmount }) => (
+                  <NewBucketDialog
+                    isOpen={isOpen}
+                    onClose={() => {
+                      close();
+                      setTimeout(unmount, 300);
+                    }}
+                  />
+                ));
+              }}
               className="text-sidebar-foreground/70 hover:text-sidebar-foreground"
             >
               <Plus className="text-sidebar-foreground/70" />
@@ -107,18 +125,6 @@ export function NavProjects() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
-
-      <NewBucketDialog open={newBucketOpen} onOpenChange={setNewBucketOpen} />
-      <UpdateBucketDialog
-        open={updateBucketOpen}
-        onOpenChange={setUpdateBucketOpen}
-        bucket={selectedBucket}
-      />
-      <DeleteBucketAlertDialog
-        open={deleteBucketOpen}
-        onOpenChange={setDeleteProjectOpen}
-        bucketId={deleteBucketId}
-      />
     </>
   );
 }
